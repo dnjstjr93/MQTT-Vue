@@ -13,8 +13,18 @@ module.exports = {
                 // options placed here will be merged with default configuration and passed to electron-builder
                 appId: 'kr.re.keti.app',
                 productName: "MQTT-Vue",
+                mac: {
+                    target: [
+                        {
+                            target: "default"
+                        }
+                    ],
+                    publish: ["github"]
+                },
+                dmg: {
+                    title:"MQTT-Vue"
+                },
                 win: {
-                    icon: "./public/GCS.png",
                     target: [
                         {
                             target: "nsis",
@@ -28,19 +38,19 @@ module.exports = {
                     perMachine: true,
                     allowToChangeInstallationDirectory: true
                 },
-                // publish: [
-                //     {
-                //         provider: "github",
-                //         owner: "dnjstjr93",
-                //         repo: "nCube-RC-HUB",
-                //         vPrefixedTagName: true,
-                //         host: "github.com",
-                //         releaseType: "release",
-                //         channel: "latest",
-                //         private: true,
-                //         token: process.env.GH_TOKEN
-                //     }
-                // ]
+                publish: [
+                    {
+                        provider: "github",
+                        owner: "dnjstjr93",
+                        repo: "MQTT-Vue",
+                        vPrefixedTagName: true,
+                        host: "github.com",
+                        releaseType: "release",
+                        channel: "latest",
+                        private: true,
+                        token: process.env.GH_TOKEN
+                    }
+                ]
             }
         }
     }

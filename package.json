@@ -1,15 +1,16 @@
 {
     "name": "MQTT-Vue",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "private": true,
     "scripts": {
         "serve": "vue-cli-service serve",
         "build": "vue-cli-service build",
         "lint": "vue-cli-service lint",
         "electron:serve": "vue-cli-service electron:serve",
-        "electron:build": "vue-cli-service electron:build"
+        "electron:build": "vue-cli-service electron:build",
+        "electron:publish": "vue-cli-service electron:build -p always"
     },
-    "main": "src/background.js",
+    "main": "background.js",
     "dependencies": {
         "@fortawesome/fontawesome-svg-core": "^1.2.36",
         "@fortawesome/free-regular-svg-icons": "^5.15.4",
@@ -61,6 +62,10 @@
         "not dead",
         "not ie 11"
     ],
-    "description": "Drone GCS with Mobius",
-    "author": "Wonseok Jung, Autonomous IoT Research Center, KETI"
+    "description": "",
+    "author": "Wonseok Jung, Autonomous IoT Research Center, KETI",
+    "repository": {
+        "type": "github",
+        "url": "https://github.com/dnjstjr93/MQTT-Vue.git"
+    }
 }
