@@ -170,17 +170,51 @@
                                 active-class="primary--text text--accent-4"
                                 @click="SubTopic=item"
                             >
-                                <template v-slot:default="{ active }">
-                                    <v-list-item-content>
-                                        <v-list-item-title v-text="item" style="font-size: 15px"></v-list-item-title>
+                                <template v-slot:default="{ }">
+                                    <v-list-item-content class="mr-n6" justify="space-between">
+                                        <v-col class="my-n2 ml-n3">
+                                            <v-list-item-title v-text="item"
+                                                               style="font-size: 15px">
+                                            </v-list-item-title>
+                                        </v-col>
+                                        <v-col cols="12" class="my-n2 text-right">
+                                            <v-btn
+                                                rounded
+                                                height="20"
+                                                style="font-size: 10px"
+                                                @click="DumpMessage"
+                                            >
+                                                Dump Message
+                                            </v-btn>
+                                            <v-btn
+                                                v-if="muteFlag"
+                                                rounded
+                                                height="20"
+                                                color="primary"
+                                                style="font-size: 10px"
+                                                @click="muteFlag=!muteFlag"
+                                            >
+                                                Mute
+                                            </v-btn>
+                                            <v-btn
+                                                v-if="!muteFlag"
+                                                rounded
+                                                height="20"
+                                                style="font-size: 10px"
+                                                @click="muteFlag=!muteFlag"
+                                            >
+                                                Mute
+                                            </v-btn>
+                                            <v-btn
+                                                rounded
+                                                height="20"
+                                                style="font-size: 10px"
+                                                @click="doUnsubscribe(item)"
+                                            >
+                                                Unsubscribe
+                                            </v-btn>
+                                        </v-col>
                                     </v-list-item-content>
-
-                                    <v-list-item-action>
-                                        <v-checkbox
-                                            :input-value="active"
-                                            color="primary accent-4"
-                                        ></v-checkbox>
-                                    </v-list-item-action>
                                 </template>
                             </v-list-item>
                         </template>
@@ -218,8 +252,8 @@
                                     </v-list-item-content>
 
                                     <v-list-item-action>
-                                        <v-chip :input-value="active"
-                                        >{{ msgLength }}
+                                        <v-chip :input-value="active">
+                                            {{ msgLength[item] }}
                                         </v-chip>
                                     </v-list-item-action>
                                 </template>
@@ -422,12 +456,13 @@ export default {
             scanTopic: null,
             ScanFlag: false,
 
-            snackBarFlag: false,
-            snackBar: '',
+            muteFlag: false,
+            opacity: 0.4,
+            absolute: true,
 
             scrollInvoked: 0,
 
-            msgLength: 0,
+            msgLength: {},
 
             decoded: [
                 {title: 'Plane Text Decoder'},
@@ -435,7 +470,7 @@ export default {
                 {title: "Base64 Decoder"},
                 {title: "Hex Format Decoder"}
             ],
-            Decoder: 'Plane Text Decoder',
+            Decoder: 'Hex Format Decoder',
             items: [{title: 'Copy All'}, {title: "Copy"}, {title: "Clear"}]
         }
     },
@@ -474,7 +509,7 @@ export default {
                 })
                 this.$store.state.client.on('message', (topic, message) => {
                     // console.log(`Received message ${message.toString()} from topic ${topic}`)
-                    this.msgLength++
+
                     if (this.ScanFlag) {
                         if (!this.ScanTopics.includes(topic)) {
                             this.ScanTopics.push(topic)
@@ -482,41 +517,43 @@ export default {
                         }
                     }
 
-                    // if (this.SubTopic) {
-                    //     if (topic.includes(this.SubTopic.replace('#', ''))) {
-                    //         if (!this.SubTopicList.includes(topic)) {
-                    //             this.SubTopicList.push(topic)
-                    //             this.SubTopicList.push('')
-                    //         }
-                    //     }
-                    // }
                     if (this.SubTopic) {
-                        this.SubTopicList.push(topic)
-                        this.SubTopicList.push('')
+                        if (topic.includes(this.SubTopic.replace('#', ''))) {
+                            if (!this.SubTopicList.includes(topic)) {
+                                this.SubTopicList.push(topic)
+                                this.SubTopicList.push('')
+                                console.log(this.SubTopicList)
+                                this.msgLength[topic] = 1
+                            } else {
+                                this.msgLength[topic]++
+                            }
+                        }
                     }
 
                     if (this.SelectTopic) {
-                        if (topic === this.SelectTopic) {
-                            if (this.Decoder === 'Hex Format Decoder') {
-                                try {
-                                    this.sub_message = message.toString('hex')
-                                } catch (e) {
-                                    console.log("Can't parse message :", message)
+                        if (!this.muteFlag) {
+                            if (topic === this.SelectTopic) {
+                                if (this.Decoder === 'Hex Format Decoder') {
+                                    try {
+                                        this.sub_message = message.toString('hex')
+                                    } catch (e) {
+                                        console.log("Can't parse message :", message)
+                                    }
+                                } else if (this.Decoder === 'JSON Pretty format Decoder') {
+                                    try {
+                                        this.sub_message = JSON.parse(message)
+                                    } catch (e) {
+                                        console.log("*** PAYLOAD IS NOT VALID JSON DATA ***\n" + e.message)
+                                    }
+                                } else if (this.Decoder === 'Base64 Decoder') {
+                                    try {
+                                        this.sub_message = message.toString('base64')
+                                    } catch (e) {
+                                        console.log("Can't parse message :", message)
+                                    }
+                                } else {
+                                    this.sub_message = message
                                 }
-                            } else if (this.Decoder === 'JSON Pretty format Decoder') {
-                                try {
-                                    this.sub_message = JSON.parse(JSON.stringify(message))
-                                } catch (e) {
-                                    console.log("*** PAYLOAD IS NOT VALID JSON DATA ***\n" + e.message)
-                                }
-                            } else if (this.Decoder === 'Base64 Decoder') {
-                                try {
-                                    this.sub_message = message.toString('base64')
-                                } catch (e) {
-                                    console.log("Can't parse message :", message)
-                                }
-                            } else {
-                                this.sub_message = message
                             }
                         }
                     }
@@ -541,9 +578,40 @@ export default {
                         console.log('Subscribe to topics error', error)
                     }
                     this.subscribeSuccess = true
-                    console.log(this.$store.state.client.connected)
 
                     console.log('Subscribe to topics res', res)
+                })
+            }
+        },
+        doUnsubscribe(topic) {
+            this.SubTopic = null
+            this.TopicList = this.TopicList.filter(
+                unsubscribeTopic => unsubscribeTopic !== topic)
+            for (let i = 0; i < this.TopicList.length; i++) {
+                if (i % 2 === 1) {
+                    if (this.TopicList[i] === '') {
+                        this.TopicList.splice(i, 1)
+                    }
+                }
+            }
+            this.SubTopicList = this.SubTopicList.filter(
+                unsubscribeTopic => !unsubscribeTopic.includes(topic.replace('#', '')))
+            for (let i = 0; i < this.SubTopicList.length; i++) {
+                if (i % 2 === 1) {
+                    if (this.SubTopicList[i] === '') {
+                        this.SubTopicList.splice(i, 1)
+                        i--
+                    }
+                }
+            }
+            console.log(this.SubTopicList)
+            if (this.$store.state.client.connected) {
+                this.$store.state.client.unsubscribe(topic, (error, res) => {
+                    if (error) {
+                        console.log('Unsubscribe to topics error', error)
+                    }
+
+                    console.log('Unsubscribe to topics res', res)
                 })
             }
         },
@@ -579,7 +647,6 @@ export default {
         },
         setAutoScroll() {
             this.AutoScroll = !this.AutoScroll
-            console.log(this.AutoScroll)
         },
         setScan() {
             this.ScanFlag = true
@@ -608,6 +675,9 @@ export default {
         },
         onScroll() {
             this.scrollInvoked++
+        },
+        DumpMessage(){
+            alert('To Be Develop')
         }
     },
     mounted() {
