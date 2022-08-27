@@ -5,18 +5,17 @@ import router from './router'
 import vuetify from './plugins/vuetify'
 import {library} from '@fortawesome/fontawesome-svg-core'
 import {
-    faWifi
+    faWifi, faList
 } from '@fortawesome/free-solid-svg-icons'
 import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
+import VueClipboard from 'vue-clipboard2'
 
 library.add(
-    faWifi
+    faWifi, faList
 )
 
 Vue.component('font-awesome-icon', FontAwesomeIcon)
-//쿠키를 사용한다.
-
-//쿠키의 만료일은 7일이다. (글로벌 세팅)
+Vue.use(VueClipboard)
 
 Vue.config.productionTip = false
 

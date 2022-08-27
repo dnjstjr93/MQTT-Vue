@@ -1,5 +1,5 @@
 <template>
-    <v-card>
+    <v-card height="775">
         <v-toolbar
             color="indigo"
             dark
@@ -17,8 +17,8 @@
                 <v-divider vertical></v-divider>
                 <v-btn
                     text
-                   style="font-size: 16px;"
-                   class="font-weight-bold"
+                    style="font-size: 16px;"
+                    class="font-weight-bold"
                     @click="onPublish(false)"
                 >
                     Subscribe
@@ -39,7 +39,7 @@
                     v-model="pub_topic"
                     style="font-size: 15px"
                     required
-                    :disabled="publishFlag"
+                    :disabled="!publishFlag"
                 ></v-text-field>
             </v-col>
             <v-col cols="1" align-self="center">
@@ -96,7 +96,275 @@
         </v-row>
 
         <v-row v-if="!publishFlag">
+            <v-col cols="1" align-self="center">
+                <div class="mt-1 ml-6" style="font-size: 20px; font-weight: bold">Topic</div>
+            </v-col>
+            <v-col cols="4">
+                <v-text-field
+                    class="pl-n16 mt-2"
+                    filled outlined dense hide-details
+                    label="Subscribe Topic"
+                    v-model="sub_topic"
+                    style="font-size: 15px"
+                    required
+                    :disabled="publishFlag"
+                ></v-text-field>
+            </v-col>
+            <v-col cols="1" align-self="center">
+                <v-btn class="mt-2 font-weight-bold"
+                       color="primary"
+                       elevation="5"
+                       @click="doSubscribe"
+                >Subscribe
+                </v-btn>
+            </v-col>
+            <v-spacer></v-spacer>
+            <v-col cols="4" align-self="end">
+                <v-row>
+                    <v-chip-group
+                        class="ml-4 font-weight-bold"
+                        mandatory
+                        active-class="primary--text"
+                    >
+                        <v-chip
+                            v-for="tag in qosList"
+                            :key="tag.label"
+                            @click="setQoS(tag.value)"
+                        >
+                            {{ tag.label }}
+                        </v-chip>
+                    </v-chip-group>
+                    <v-chip-group
+                        class="font-weight-bold"
+                        mandatory
+                        active-class="primary--text"
+                    >
+                        <v-chip
+                            class="font-weight-bold"
+                            :key="true"
+                            @click="setAutoScroll"
+                        >
+                            AutoScroll
+                        </v-chip>
+                    </v-chip-group>
+                </v-row>
+            </v-col>
+        </v-row>
+        <v-divider v-if="!publishFlag" class="my-3"></v-divider>
+        <v-row v-if="!publishFlag" class="ml-1" style="height: 35%">
+            <v-col cols="4">
+                <div class="font-weight-bold">List</div>
+                <v-list dense>
+                    <v-list-item-group v-model="model">
+                        <template v-for="(item, i) in TopicList">
+                            <v-divider
+                                v-if="!item"
+                                :key="`divider-${i}`"
+                                class="mt-n2"
+                            ></v-divider>
+                            <v-list-item
+                                v-else
+                                :key="`item-${i}`"
+                                :value="item"
+                                dense
+                                active-class="primary--text text--accent-4"
+                                @click="SubTopic=item"
+                            >
+                                <template v-slot:default="{ active }">
+                                    <v-list-item-content>
+                                        <v-list-item-title v-text="item" style="font-size: 15px"></v-list-item-title>
+                                    </v-list-item-content>
 
+                                    <v-list-item-action>
+                                        <v-checkbox
+                                            :input-value="active"
+                                            color="primary accent-4"
+                                        ></v-checkbox>
+                                    </v-list-item-action>
+                                </template>
+                            </v-list-item>
+                        </template>
+                    </v-list-item-group>
+                </v-list>
+            </v-col>
+            <v-divider vertical></v-divider>
+            <v-col cols="8" v-scroll.self="onScroll"
+            >
+                <div class="font-weight-bold">Topic List</div>
+                <v-list dense>
+                    <v-list-item-group v-model="model">
+                        <template v-for="(item, i) in SubTopicList">
+                            <v-divider
+                                v-if="!item"
+                                :key="`divider-${i}`"
+                                class="mt-n2"
+                            ></v-divider>
+                            <v-list-item
+                                v-else
+                                :key="`item-${i}`"
+                                :value="item"
+                                dense
+                                active-class="primary--text text--accent-4"
+                                @click="SelectTopic=item"
+                            >
+                                <template v-slot:default="{ active }">
+                                    <v-list-item-content>
+                                        <v-col cols="10">
+                                            <v-list-item-title v-text="item"
+                                                               style="font-size: 15px">
+                                            </v-list-item-title>
+                                        </v-col>
+
+                                    </v-list-item-content>
+
+                                    <v-list-item-action>
+                                        <v-chip :input-value="active"
+                                        >{{ msgLength }}
+                                        </v-chip>
+                                    </v-list-item-action>
+                                </template>
+                            </v-list-item>
+                        </template>
+                    </v-list-item-group>
+                </v-list>
+            </v-col>
+        </v-row>
+        <v-divider class="mt-3"></v-divider>
+        <v-row class="ml-1 mt-1 fill-height">
+            <v-col cols="4">
+                <v-row class="mt-n4">
+                    <v-col cols="5">
+                        <span class="font-weight-bold">Topics Collector</span>
+                    </v-col>
+                    <v-col cols="7" class="text-right">
+                        <v-btn
+                            rounded
+                            height="25"
+                            width="40"
+                            @click="setScan"
+                            :disabled="ScanFlag"
+                        >Scan
+                        </v-btn>
+                        <v-btn
+                            class="mx-1"
+                            rounded
+                            height="25"
+                            width="40"
+                            @click="setStop"
+                            :disabled="!ScanFlag"
+                        >Stop
+                        </v-btn>
+                        <v-menu offset-y>
+                            <template v-slot:activator="{ on, attrs }">
+                                <v-btn
+                                    rounded
+                                    color="primary"
+                                    dark
+                                    v-bind="attrs"
+                                    v-on="on"
+                                    height="25"
+                                >
+                                    <font-awesome-icon class="mr-1" icon="list" size="1x"/>
+                                </v-btn>
+                            </template>
+                            <v-list>
+                                <v-list-item-group
+                                    v-model="model"
+                                    color="primary"
+                                >
+                                    <v-list-item
+                                        class="my-n3"
+                                        v-for="(item, index) in items"
+                                        :key="index"
+                                        @click="manList(item.title)"
+                                    >
+                                        <v-list-item-title>{{ item.title }}</v-list-item-title>
+                                    </v-list-item>
+                                </v-list-item-group>
+                            </v-list>
+                        </v-menu>
+                    </v-col>
+                </v-row>
+                <v-row>
+                    <v-card width="430">
+                        <v-list dense class="ml-n2">
+                            <v-list-item-group v-model="model">
+                                <template v-for="(item, i) in ScanTopics">
+                                    <v-divider
+                                        v-if="!item"
+                                        :key="`divider-${i}`"
+                                        class="mt-n2"
+                                    ></v-divider>
+                                    <v-list-item
+                                        v-else
+                                        :key="`item-${i}`"
+                                        :value="item"
+                                        dense
+                                        active-class="primary--text text--accent-4"
+                                        @click="scanTopic=item"
+                                    >
+                                        <template v-slot:default="{ active }">
+                                            <v-list-item-content>
+                                                <v-list-item-title v-text="item"
+                                                                   style="font-size: 15px"></v-list-item-title>
+                                            </v-list-item-content>
+
+                                            <v-list-item-action>
+                                                <v-checkbox
+                                                    :input-value="active"
+                                                    color="primary accent-4"
+                                                ></v-checkbox>
+                                            </v-list-item-action>
+                                        </template>
+                                    </v-list-item>
+                                </template>
+                            </v-list-item-group>
+                        </v-list>
+                    </v-card>
+                </v-row>
+            </v-col>
+            <v-divider vertical class="mt-n1"></v-divider>
+            <v-col cols="8">
+                <v-row v-if="!publishFlag" class="mr-2">
+                    <v-col cols="3">
+                        <div class="ml-3 mt-2 font-weight-bold">Payload</div>
+                    </v-col>
+                    <v-col cols="9" class="text-right">
+                        <span class="font-weight-bold">Payload decoded by  </span>
+                        <v-menu offset-y>
+                            <template v-slot:activator="{ on, attrs }">
+                                <v-btn
+                                    color="primary"
+                                    dark
+                                    v-bind="attrs"
+                                    v-on="on"
+                                >
+                                    {{ Decoder }}
+                                </v-btn>
+                            </template>
+                            <v-list>
+                                <v-list-item-group
+                                    v-model="model"
+                                    color="primary"
+                                >
+                                    <v-list-item
+                                        v-for="(item, index) in decoded"
+                                        :key="index"
+                                        @click="Decoder=item.title"
+                                    >
+                                        <v-list-item-title>{{ item.title }}</v-list-item-title>
+                                    </v-list-item>
+                                </v-list-item-group>
+                            </v-list>
+                        </v-menu>
+                    </v-col>
+                </v-row>
+                <v-row v-if="!publishFlag" class="mx-3" style="height: 100%">
+                    <v-card class="ml-n1" height="300" width="1000" elevation="5">
+                        <v-card-text class="font-weight-bold" style="font-size: 15px">{{ sub_message }}</v-card-text>
+                    </v-card>
+                </v-row>
+            </v-col>
         </v-row>
     </v-card>
 </template>
@@ -132,10 +400,43 @@ export default {
             ],
 
             publishFlag: true,
+
             pub_topic: '',
             pub_message: '',
-            pub_qos: '',
-            pub_retain: ''
+
+            sub_topic: '',
+            sub_message: '',
+
+            qos: 0,
+            retain: false,
+
+            AutoScroll: true,
+
+            model: 1,
+            TopicList: [''],
+            SubTopicList: [''],
+            SubTopic: null,
+            SelectTopic: null,
+
+            ScanTopics: [''],
+            scanTopic: null,
+            ScanFlag: false,
+
+            snackBarFlag: false,
+            snackBar: '',
+
+            scrollInvoked: 0,
+
+            msgLength: 0,
+
+            decoded: [
+                {title: 'Plane Text Decoder'},
+                {title: "JSON Pretty format Decoder"},
+                {title: "Base64 Decoder"},
+                {title: "Hex Format Decoder"}
+            ],
+            Decoder: 'Plane Text Decoder',
+            items: [{title: 'Copy All'}, {title: "Copy"}, {title: "Clear"}]
         }
     },
     methods: {
@@ -167,24 +468,82 @@ export default {
                         this.subscribeSuccess = true
                         console.log('Subscribe to topics res', res)
                     })
-
-                    // this.topicList.push({"name": 'Mobius', children: [{"name": "KETI_MUV"}]})
-                    //
-                    // this.topicList.push({"name": 'oneM2M', children: []})
                 })
                 this.$store.state.client.on('error', error => {
                     console.log('Connection failed', error)
                 })
                 this.$store.state.client.on('message', (topic, message) => {
-                    console.log(`Received message ${message.toString()} from topic ${topic}`)
+                    // console.log(`Received message ${message.toString()} from topic ${topic}`)
+                    this.msgLength++
+                    if (this.ScanFlag) {
+                        if (!this.ScanTopics.includes(topic)) {
+                            this.ScanTopics.push(topic)
+                            this.ScanTopics.push('')
+                        }
+                    }
+
+                    // if (this.SubTopic) {
+                    //     if (topic.includes(this.SubTopic.replace('#', ''))) {
+                    //         if (!this.SubTopicList.includes(topic)) {
+                    //             this.SubTopicList.push(topic)
+                    //             this.SubTopicList.push('')
+                    //         }
+                    //     }
+                    // }
+                    if (this.SubTopic) {
+                        this.SubTopicList.push(topic)
+                        this.SubTopicList.push('')
+                    }
+
+                    if (this.SelectTopic) {
+                        if (topic === this.SelectTopic) {
+                            if (this.Decoder === 'Hex Format Decoder') {
+                                try {
+                                    this.sub_message = message.toString('hex')
+                                } catch (e) {
+                                    console.log("Can't parse message :", message)
+                                }
+                            } else if (this.Decoder === 'JSON Pretty format Decoder') {
+                                try {
+                                    this.sub_message = JSON.parse(JSON.stringify(message))
+                                } catch (e) {
+                                    console.log("*** PAYLOAD IS NOT VALID JSON DATA ***\n" + e.message)
+                                }
+                            } else if (this.Decoder === 'Base64 Decoder') {
+                                try {
+                                    this.sub_message = message.toString('base64')
+                                } catch (e) {
+                                    console.log("Can't parse message :", message)
+                                }
+                            } else {
+                                this.sub_message = message
+                            }
+                        }
+                    }
                 })
             }
         },
         doPublish() {
             if (this.$store.state.client.connected) {
                 this.$store.state.client.publish(this.pub_topic, Buffer.from(this.pub_message), {
-                    qos: this.pub_qos,
-                    retain: this.pub_retain
+                    qos: this.qos,
+                    retain: this.retain
+                })
+            }
+        },
+        doSubscribe() {
+            this.TopicList.push(this.sub_topic)
+            this.TopicList.push('')
+            if (this.$store.state.client.connected) {
+                console.log(this.sub_topic, this.qos)
+                this.$store.state.client.subscribe(this.sub_topic, {qos: this.qos}, (error, res) => {
+                    if (error) {
+                        console.log('Subscribe to topics error', error)
+                    }
+                    this.subscribeSuccess = true
+                    console.log(this.$store.state.client.connected)
+
+                    console.log('Subscribe to topics res', res)
                 })
             }
         },
@@ -213,10 +572,42 @@ export default {
             this.publishFlag = flag
         },
         setQoS(qos) {
-            this.pub_qos = qos
+            this.qos = qos
         },
         setRetain() {
-            this.pub_retain = !this.pub_retain
+            this.retain = !this.retain
+        },
+        setAutoScroll() {
+            this.AutoScroll = !this.AutoScroll
+            console.log(this.AutoScroll)
+        },
+        setScan() {
+            this.ScanFlag = true
+        },
+        setStop() {
+            this.ScanFlag = false
+        },
+        manList(item) {
+            if (item === 'Clear') {
+                this.ScanTopics = []
+            } else if (item === 'Copy') {
+                this.$copyText(this.scanTopic).then(function (e) {
+                    console.log('Copied', e)
+                }, function (e) {
+                    console.log('Can not copy', e)
+                });
+            } else if (item === 'Copy All') {
+                let topics = this.ScanTopics.filter(
+                    topic => topic !== '')
+                this.$copyText(topics.toString()).then(function (e) {
+                    console.log('Copied', e)
+                }, function (e) {
+                    console.log('Can not copy', e)
+                });
+            }
+        },
+        onScroll() {
+            this.scrollInvoked++
         }
     },
     mounted() {

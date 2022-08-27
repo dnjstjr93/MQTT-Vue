@@ -32,7 +32,7 @@
                         :disabled="MQTT_CONNECTION_CONNECTED"
                     ></v-text-field>
                 </v-col>
-                <v-col cols="1">
+                <v-col cols="2">
                     <v-text-field
                         class="mx-2"
                         dense dark hide-details outlined
