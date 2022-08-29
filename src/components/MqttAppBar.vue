@@ -84,7 +84,7 @@ export default {
             MQTT_CONNECTION_CONNECTED: false,
 
             protocol: ['mqtt', 'ws'],
-            default_protocol: 'mqtt',
+            default_protocol: localStorage.getItem('mqtt_protocol') ? (localStorage.getItem('mqtt_protocol')) : (this.$store.state.VUE_APP_MQTT_PROTOCOL),
             host: localStorage.getItem('mqtt_host') ? (localStorage.getItem('mqtt_host')) : (this.$store.state.VUE_APP_MQTT_HOST),
             host_rule: [
                 v => !!v || 'HOST 주소는 필수 입력사항입니다.',
@@ -101,7 +101,7 @@ export default {
     },
     methods: {
         GcsAppBarCreated() {
-            this.$store.state.VUE_APP_MQTT_PROTOCOL = this.protocol
+            this.$store.state.VUE_APP_MQTT_PROTOCOL = this.default_protocol
             this.$store.state.VUE_APP_MQTT_HOST = this.host
             this.$store.state.VUE_APP_MQTT_PORT = this.port
             this.MQTT_CONNECTION_CONNECTED = true
@@ -109,7 +109,7 @@ export default {
 
             localStorage.setItem('mqtt_host', this.host)
             localStorage.setItem('mqtt_port', this.port)
-            localStorage.setItem('mqtt_protocol', this.protocol)
+            localStorage.setItem('mqtt_protocol', this.default_protocol)
 
             EventBus.$emit('mqttConnection')
         },

@@ -9,6 +9,9 @@ export default new Vuex.Store({
         VUE_APP_MQTT_HOST: 'gcs.iotocean.org',
         VUE_APP_MQTT_PORT: 1883,
 
+        storagePubTopic: [],
+        storageSubTopic: [],
+
         client: {
             connected: false,
             loading: false

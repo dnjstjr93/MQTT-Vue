@@ -32,21 +32,53 @@
                 <div class="mt-1 ml-6" style="font-size: 20px; font-weight: bold">Topic</div>
             </v-col>
             <v-col cols="4">
-                <v-text-field
-                    class="pl-n16 mt-2"
-                    filled outlined dense hide-details
-                    label="Publish Topic"
-                    v-model="pub_topic"
-                    style="font-size: 15px"
-                    required
-                    :disabled="!publishFlag"
-                ></v-text-field>
+                <v-row class="mt-2">
+                    <v-text-field
+                        class="pl-n16"
+                        filled outlined dense hide-details
+                        label="Publish Topic"
+                        v-model="pub_topic"
+                        style="font-size: 15px"
+                        required
+                        :disabled="!publishFlag"
+                    ></v-text-field>
+                    <v-menu offset-y>
+                        <template v-slot:activator="{ on, attrs }">
+                            <v-btn
+                                class="ml-n12 px-n2"
+                                color="primary"
+                                dark
+                                v-bind="attrs"
+                                v-on="on"
+                                height="40"
+                            >
+                                <font-awesome-icon class="mr-1" icon="list" size="1x"/>
+                            </v-btn>
+                        </template>
+                        <v-list>
+                            <v-list-item-group
+                                v-model="model"
+                                color="primary"
+                            >
+                                <v-list-item
+                                    class="my-n3"
+                                    v-for="(item, index) in storagePubTopic"
+                                    :key="index"
+                                    @click="pub_topic=item.title"
+                                >
+                                    <v-list-item-title>{{ item.title }}</v-list-item-title>
+                                </v-list-item>
+                            </v-list-item-group>
+                        </v-list>
+                    </v-menu>
+                </v-row>
             </v-col>
             <v-col cols="1" align-self="center">
                 <v-btn class="mt-2 font-weight-bold"
                        color="primary"
                        elevation="5"
                        @click="doPublish"
+                       height="40"
                 >Publish
                 </v-btn>
             </v-col>
@@ -78,6 +110,36 @@
                             Retain
                         </v-chip>
                     </v-chip-group>
+                    <v-menu offset-y>
+                        <template v-slot:activator="{ on, attrs }">
+                            <v-btn
+                                class="mt-2"
+                                rounded
+                                color="primary"
+                                dark
+                                v-bind="attrs"
+                                v-on="on"
+                                height="31"
+                            >
+                                <font-awesome-icon class="mr-1" icon="list" size="1x"/>
+                            </v-btn>
+                        </template>
+                        <v-list>
+                            <v-list-item-group
+                                v-model="model"
+                                color="primary"
+                            >
+                                <v-list-item
+                                    class="my-n3"
+                                    v-for="(item, index) in pub_menu"
+                                    :key="index"
+                                    @click="manClear(item.title)"
+                                >
+                                    <v-list-item-title>{{ item.title }}</v-list-item-title>
+                                </v-list-item>
+                            </v-list-item-group>
+                        </v-list>
+                    </v-menu>
                 </v-row>
             </v-col>
         </v-row>
@@ -94,26 +156,58 @@
                 v-model="pub_message"
             ></v-textarea>
         </v-row>
-
+<!--------------------------------------------------------------------------------------------------------------------->
         <v-row v-if="!publishFlag">
             <v-col cols="1" align-self="center">
                 <div class="mt-1 ml-6" style="font-size: 20px; font-weight: bold">Topic</div>
             </v-col>
             <v-col cols="4">
-                <v-text-field
-                    class="pl-n16 mt-2"
-                    filled outlined dense hide-details
-                    label="Subscribe Topic"
-                    v-model="sub_topic"
-                    style="font-size: 15px"
-                    required
-                    :disabled="publishFlag"
-                ></v-text-field>
+                <v-row class="mt-2">
+                    <v-text-field
+                        class="pl-n16"
+                        filled outlined dense hide-details
+                        label="Subscribe Topic"
+                        v-model="sub_topic"
+                        style="font-size: 15px"
+                        required
+                        :disabled="publishFlag"
+                    ></v-text-field>
+                    <v-menu offset-y>
+                        <template v-slot:activator="{ on, attrs }">
+                            <v-btn
+                                class="ml-n12 px-n2"
+                                color="primary"
+                                dark
+                                v-bind="attrs"
+                                v-on="on"
+                                height="40"
+                            >
+                                <font-awesome-icon class="mr-1" icon="list" size="1x"/>
+                            </v-btn>
+                        </template>
+                        <v-list>
+                            <v-list-item-group
+                                v-model="model"
+                                color="primary"
+                            >
+                                <v-list-item
+                                    class="my-n3"
+                                    v-for="(item, index) in storageSubTopic"
+                                    :key="index"
+                                    @click="sub_topic=item.title"
+                                >
+                                    <v-list-item-title>{{ item.title }}</v-list-item-title>
+                                </v-list-item>
+                            </v-list-item-group>
+                        </v-list>
+                    </v-menu>
+                </v-row>
             </v-col>
             <v-col cols="1" align-self="center">
                 <v-btn class="mt-2 font-weight-bold"
                        color="primary"
                        elevation="5"
+                       height="40"
                        @click="doSubscribe"
                 >Subscribe
                 </v-btn>
@@ -147,6 +241,36 @@
                             AutoScroll
                         </v-chip>
                     </v-chip-group>
+                    <v-menu offset-y>
+                        <template v-slot:activator="{ on, attrs }">
+                            <v-btn
+                                class="mt-2"
+                                rounded
+                                color="primary"
+                                dark
+                                v-bind="attrs"
+                                v-on="on"
+                                height="31"
+                            >
+                                <font-awesome-icon class="mr-1" icon="list" size="1x"/>
+                            </v-btn>
+                        </template>
+                        <v-list>
+                            <v-list-item-group
+                                v-model="model"
+                                color="primary"
+                            >
+                                <v-list-item
+                                    class="my-n3"
+                                    v-for="(item, index) in pub_menu"
+                                    :key="index"
+                                    @click="manSubClear(item.title)"
+                                >
+                                    <v-list-item-title>{{ item.title }}</v-list-item-title>
+                                </v-list-item>
+                            </v-list-item-group>
+                        </v-list>
+                    </v-menu>
                 </v-row>
             </v-col>
         </v-row>
@@ -336,6 +460,7 @@
                                         dense
                                         active-class="primary--text text--accent-4"
                                         @click="scanTopic=item"
+                                        @dblclick="doSubscribe(item)"
                                     >
                                         <template v-slot:default="{ active }">
                                             <v-list-item-content>
@@ -437,9 +562,12 @@ export default {
 
             pub_topic: '',
             pub_message: '',
+            pub_menu: [{title: 'Clear All Topics'}, {title: "Clear Messages"}],
+            storagePubTopic: (localStorage.getItem('PublishTopics')) ? (localStorage.getItem('PublishTopics')) : (this.$store.state.storagePubTopic),
 
             sub_topic: '',
             sub_message: '',
+            storageSubTopic: (localStorage.getItem('SubscribeTopics')) ? (localStorage.getItem('SubscribeTopics')) : (this.$store.state.storageSubTopic),
 
             qos: 0,
             retain: false,
@@ -522,7 +650,6 @@ export default {
                             if (!this.SubTopicList.includes(topic)) {
                                 this.SubTopicList.push(topic)
                                 this.SubTopicList.push('')
-                                console.log(this.SubTopicList)
                                 this.msgLength[topic] = 1
                             } else {
                                 this.msgLength[topic]++
@@ -541,6 +668,7 @@ export default {
                                     }
                                 } else if (this.Decoder === 'JSON Pretty format Decoder') {
                                     try {
+                                        // TODO: 이스케이프 적용
                                         this.sub_message = JSON.parse(message)
                                     } catch (e) {
                                         console.log("*** PAYLOAD IS NOT VALID JSON DATA ***\n" + e.message)
@@ -567,8 +695,14 @@ export default {
                     retain: this.retain
                 })
             }
+
+            this.storagePubTopic.push({title: this.pub_topic})
+            localStorage.setItem('PublishTopics', JSON.stringify(this.storagePubTopic))
         },
-        doSubscribe() {
+        doSubscribe(topic) {
+            if (topic){
+                this.sub_topic = topic
+            }
             this.TopicList.push(this.sub_topic)
             this.TopicList.push('')
             if (this.$store.state.client.connected) {
@@ -582,6 +716,8 @@ export default {
                     console.log('Subscribe to topics res', res)
                 })
             }
+            this.storageSubTopic.push({title: this.sub_topic})
+            localStorage.setItem('SubscribeTopics', JSON.stringify(this.storageSubTopic))
         },
         doUnsubscribe(topic) {
             this.SubTopic = null
@@ -604,13 +740,12 @@ export default {
                     }
                 }
             }
-            console.log(this.SubTopicList)
+
             if (this.$store.state.client.connected) {
                 this.$store.state.client.unsubscribe(topic, (error, res) => {
                     if (error) {
                         console.log('Unsubscribe to topics error', error)
                     }
-
                     console.log('Unsubscribe to topics res', res)
                 })
             }
@@ -654,6 +789,15 @@ export default {
         setStop() {
             this.ScanFlag = false
         },
+        manClear(item) {
+            if (item === 'Clear All Topics') {
+                this.pub_topic = ''
+                this.storagePubTopic = []
+                localStorage.setItem('PublishTopics', JSON.stringify(this.storagePubTopic))
+            } else if (item === "Clear Messages") {
+                this.pub_message = ''
+            }
+        },
         manList(item) {
             if (item === 'Clear') {
                 this.ScanTopics = []
@@ -676,8 +820,21 @@ export default {
         onScroll() {
             this.scrollInvoked++
         },
-        DumpMessage(){
+        DumpMessage() {
             alert('To Be Develop')
+        },
+        manSubClear(item) {
+            if (item === 'Clear All Topics') {
+                this.sub_topic = ''
+                this.storageSubTopic = []
+                this.TopicList = ['']
+                this.SubTopicList = ['']
+                this.SubTopic = null
+                this.SelectTopic = null
+                localStorage.setItem('SubscribeTopics', JSON.stringify(this.storageSubTopic))
+            } else if (item === "Clear Messages") {
+                this.sub_message = ''
+            }
         }
     },
     mounted() {
@@ -688,6 +845,18 @@ export default {
                 this.destroyConnection()
             }
         });
+
+        try{
+            this.storagePubTopic = JSON.parse(this.storagePubTopic)
+        } catch (e) {
+            this.storagePubTopic = []
+        }
+
+        try{
+            this.storageSubTopic = JSON.parse(this.storageSubTopic)
+        } catch (e) {
+            this.storageSubTopic = []
+        }
     },
     beforeDestroy() {
         this.destroyConnection()
