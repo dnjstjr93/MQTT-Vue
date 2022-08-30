@@ -7,17 +7,27 @@ yarn install
 
 ### Compiles and hot-reloads for development
 ```
-yarn serve
+yarn electron:serve
 ```
 
 ### Compiles and minifies for production
 ```
-yarn build
+yarn electron:build
 ```
 
-### Lints and fixes files
+### Set Python PATH (for MacOS)
+- Install Python2
+```shell
+brew install pyenv
+pyenv install 2.7.18
 ```
-yarn lint
+- Set Environment variable
+```
+PYTHON_PATH=<your python2 path>
+
+- for example,
+
+PYTHON_PATH=/User/<username>/.pyenv/versions/2.7.18/bin/python2
 ```
 
 ### Customize configuration
