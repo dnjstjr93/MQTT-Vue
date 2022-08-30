@@ -697,6 +697,7 @@ export default {
             }
 
             this.storagePubTopic.push({title: this.pub_topic})
+            // TODO: 이미 있으면 패스, 없으면 저장
             localStorage.setItem('PublishTopics', JSON.stringify(this.storagePubTopic))
         },
         doSubscribe(topic) {

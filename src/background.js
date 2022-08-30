@@ -1,8 +1,9 @@
 'use strict'
 
-import { app, protocol, BrowserWindow } from 'electron'
-import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
-import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
+import {app, protocol, BrowserWindow} from 'electron'
+import {createProtocol} from 'vue-cli-plugin-electron-builder/lib'
+import installExtension, {VUEJS_DEVTOOLS} from 'electron-devtools-installer'
+import os from 'os'
 // const { autoUpdater } = require("electron-updater");
 // const log = require('electron-log');
 // const path = require('path');
@@ -11,23 +12,38 @@ const isDevelopment = process.env.NODE_ENV !== 'production'
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
-    { scheme: 'app', privileges: { secure: true, standard: true } }
+    {scheme: 'app', privileges: {secure: true, standard: true}}
 ])
+
+let win = null;
 
 async function createWindow() {
     // Create the browser window.
-    const win = new BrowserWindow({
-        width: 1200,
-        height: 850,
-        autoHideMenuBar: false,
-        webPreferences: {
-
-            // Use pluginOptions.nodeIntegration, leave this alone
-            // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
-            nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
-            contextIsolation: !process.env.ELECTRON_NODE_INTEGRATION
-        }
-    })
+    if (os.platform() === 'darwin') {
+        win = new BrowserWindow({
+            width: 1200,
+            height: 850,
+            autoHideMenuBar: true,
+            webPreferences: {
+                // Use pluginOptions.nodeIntegration, leave this alone
+                // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
+                nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
+                contextIsolation: !process.env.ELECTRON_NODE_INTEGRATION
+            }
+        })
+    } else if (os.platform() === 'win32') {
+        win = new BrowserWindow({
+            width: 1400,
+            height: 860,
+            autoHideMenuBar: true,
+            webPreferences: {
+                // Use pluginOptions.nodeIntegration, leave this alone
+                // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
+                nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
+                contextIsolation: !process.env.ELECTRON_NODE_INTEGRATION
+            }
+        })
+    }
 
     if (process.env.WEBPACK_DEV_SERVER_URL) {
         // Load the url of the dev server if in development mode
