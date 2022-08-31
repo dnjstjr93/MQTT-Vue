@@ -156,7 +156,7 @@
                 v-model="pub_message"
             ></v-textarea>
         </v-row>
-<!--------------------------------------------------------------------------------------------------------------------->
+        <!--------------------------------------------------------------------------------------------------------------------->
         <v-row v-if="!publishFlag">
             <v-col cols="1" align-self="center">
                 <div class="mt-1 ml-6" style="font-size: 20px; font-weight: bold">Topic</div>
@@ -460,7 +460,7 @@
                                         dense
                                         active-class="primary--text text--accent-4"
                                         @click="scanTopic=item"
-                                        @dblclick="doSubscribe(item)"
+                                        @dblclick="doScanSubscribe(item)"
                                     >
                                         <template v-slot:default="{ active }">
                                             <v-list-item-content>
@@ -700,9 +700,27 @@ export default {
             // TODO: 이미 있으면 패스, 없으면 저장
             localStorage.setItem('PublishTopics', JSON.stringify(this.storagePubTopic))
         },
-        doSubscribe(topic) {
-            if (topic){
-                this.sub_topic = topic
+        doSubscribe() {
+            this.TopicList.push(this.sub_topic)
+            this.TopicList.push('')
+            if (this.$store.state.client.connected) {
+                console.log(this.sub_topic, this.qos)
+                this.$store.state.client.subscribe(this.sub_topic, {qos: this.qos}, (error, res) => {
+                    if (error) {
+                        console.log('Subscribe to topics error', error)
+                    }
+                    this.subscribeSuccess = true
+
+                    console.log('Subscribe to topics res', res)
+                })
+            }
+            this.storageSubTopic.push({title: this.sub_topic})
+            localStorage.setItem('SubscribeTopics', JSON.stringify(this.storageSubTopic))
+        },
+        doScanSubscribe(item) {
+            console.log(item)
+            if (item) {
+                this.sub_topic = item
             }
             this.TopicList.push(this.sub_topic)
             this.TopicList.push('')
@@ -847,13 +865,13 @@ export default {
             }
         });
 
-        try{
+        try {
             this.storagePubTopic = JSON.parse(this.storagePubTopic)
         } catch (e) {
             this.storagePubTopic = []
         }
 
-        try{
+        try {
             this.storageSubTopic = JSON.parse(this.storageSubTopic)
         } catch (e) {
             this.storageSubTopic = []
