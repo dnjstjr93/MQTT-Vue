@@ -4,8 +4,8 @@ import {app, protocol, BrowserWindow} from 'electron'
 import {createProtocol} from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, {VUEJS_DEVTOOLS} from 'electron-devtools-installer'
 import os from 'os'
-// const { autoUpdater } = require("electron-updater");
-// const log = require('electron-log');
+const { autoUpdater } = require("electron-updater");
+const log = require('electron-log');
 // const path = require('path');
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
@@ -54,31 +54,37 @@ async function createWindow() {
         // Load the index.html when not in development
         win.loadURL('app://./index.html')
     }
+
+    return win
 }
 
 /* Updater ======================================================*/
+function sendStatusToWindow(text) {
+    log.info(text);
+    win.webContents.send('message', text);
+}
 
-// autoUpdater.on('checking-for-update', () => {
-//     log.info('업데이트 확인 중...');
-// });
-// autoUpdater.on('update-available', (info) => {
-//     log.info('업데이트가 가능합니다.');
-// });
-// autoUpdater.on('update-not-available', (info) => {
-//     log.info('현재 최신버전(' + app.getVersion() + ')입니다.');
-// });
-// autoUpdater.on('error', (err) => {
-//     log.info('에러가 발생하였습니다. 에러내용 : ' + err);
-// });
-// autoUpdater.on('download-progress', (progressObj) => {
-//     let log_message = "다운로드 속도: " + progressObj.bytesPerSecond;
-//     log_message = log_message + ' - 현재 ' + progressObj.percent + '%';
-//     log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
-//     log.info(log_message);
-// })
-// autoUpdater.on('update-downloaded', (info) => {
-//     log.info('업데이트가 완료되었습니다.');
-// });
+autoUpdater.on('checking-for-update', () => {
+    sendStatusToWindow('Checking for update...');
+})
+autoUpdater.on('update-available', (info) => {
+    sendStatusToWindow('Update available.');
+})
+autoUpdater.on('update-not-available', (info) => {
+    sendStatusToWindow('Update not available.');
+})
+autoUpdater.on('error', (err) => {
+    sendStatusToWindow('Error in auto-updater. ' + err);
+})
+autoUpdater.on('download-progress', (progressObj) => {
+    let log_message = "Download speed: " + progressObj.bytesPerSecond;
+    log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
+    log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
+    sendStatusToWindow(log_message);
+})
+autoUpdater.on('update-downloaded', (info) => {
+    sendStatusToWindow('Update downloaded');
+});
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
@@ -111,6 +117,10 @@ app.on('ready', async () => {
     // autoUpdater.autoDownload = true;
     // autoUpdater.checkForUpdates();
 })
+
+app.on('ready', function()  {
+    autoUpdater.checkForUpdatesAndNotify();
+});
 
 // Exit cleanly on request from parent process in development mode.
 if (isDevelopment) {

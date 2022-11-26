@@ -16,8 +16,8 @@
                         :items="protocol"
                         label="PROTOCOL*"
                         dense dark hide-details outlined
-                        style="font-size: 18px;"
-                        :disabled="MQTT_CONNECTION_CONNECTED"
+                        style="font-size: 16px;"
+                        :disabled="$store.state.MQTT_CONNECTION_CONNECTED"
                     ></v-select>
                 </v-col>
                 <v-col cols="2">
@@ -27,9 +27,9 @@
                         v-model="host" :rules="host_rule"
                         placeholder="gcs.iotocean.org"
                         label="HOST*"
-                        style="font-size: 18px;"
+                        style="font-size: 16px;"
                         required
-                        :disabled="MQTT_CONNECTION_CONNECTED"
+                        :disabled="$store.state.MQTT_CONNECTION_CONNECTED"
                     ></v-text-field>
                 </v-col>
                 <v-col cols="2">
@@ -40,30 +40,30 @@
                         v-model="port" :rules="port_rule"
                         placeholder="1883"
                         label="PORT*"
-                        style="font-size: 18px;"
+                        style="font-size: 16px;"
                         required
-                        :disabled="MQTT_CONNECTION_CONNECTED"
+                        :disabled="$store.state.MQTT_CONNECTION_CONNECTED"
                     ></v-text-field>
                 </v-col>
                 <v-col cols="4" align-self="center">
                     <v-btn
                         class="mx-2 mt-n1 rounded-lg"
-                        tile @click="GcsAppBarCreated"
+                        tile @click="MqttAppBarCreated"
                         elevation="4"
                         color="success"
                         style="font-size: 18px;"
                         height="40"
-                        :disabled="MQTT_CONNECTION_CONNECTED"
+                        :disabled="$store.state.MQTT_CONNECTION_CONNECTED"
                     > {{ MQTT_CONNECTION_TEXT }}
                     </v-btn>
                     <v-btn
                         class="mx-2 mt-n1 rounded-lg"
-                        tile @click="GcsAppBarReseted"
+                        tile @click="MqttAppBarReseted"
                         elevation="2"
                         color="error"
                         style="font-size: 18px;"
                         height="40"
-                        :disabled="!MQTT_CONNECTION_CONNECTED"
+                        :disabled="!$store.state.MQTT_CONNECTION_CONNECTED"
                     > {{ MQTT_DISCONNECTION_TEXT }}
                     </v-btn>
                 </v-col>
@@ -100,10 +100,11 @@ export default {
         }
     },
     methods: {
-        GcsAppBarCreated() {
+        MqttAppBarCreated() {
             this.$store.state.VUE_APP_MQTT_PROTOCOL = this.default_protocol
             this.$store.state.VUE_APP_MQTT_HOST = this.host
             this.$store.state.VUE_APP_MQTT_PORT = this.port
+
             this.MQTT_CONNECTION_CONNECTED = true
             this.$store.state.MQTT_CONNECTION_CONNECTED = true
 
@@ -113,7 +114,7 @@ export default {
 
             EventBus.$emit('mqttConnection')
         },
-        GcsAppBarReseted() {
+        MqttAppBarReseted() {
             this.MQTT_CONNECTION_CONNECTED = false
             this.$store.state.MQTT_CONNECTION_CONNECTED = false
 
@@ -122,11 +123,11 @@ export default {
     },
     mounted() {
         if (this.MQTT_CONNECTION_CONNECTED) {
-            this.GcsAppBarCreated();
+            this.MqttAppBarCreated();
         }
     },
     beforeDestroy() {
-        this.GcsAppBarReseted()
+        this.MqttAppBarReseted()
     }
 }
 </script>

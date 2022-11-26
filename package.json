@@ -1,7 +1,8 @@
 {
     "name": "MQTT-Vue",
-    "version": "1.0.2",
+    "version": "1.1.0",
     "private": true,
+    "description": "MQTT Client based on vue.js and electron.",
     "scripts": {
         "serve": "vue-cli-service serve",
         "build": "vue-cli-service build",
@@ -18,7 +19,10 @@
         "@fortawesome/vue-fontawesome": "^2.0.6",
         "core-js": "^3.8.3",
         "electron": "^20.1.0",
+        "electron-builder": "^23.6.0",
         "electron-devtools-installer": "^3.2.0",
+        "electron-log": "^4.4.8",
+        "electron-updater": "^5.3.0",
         "mqtt": "^4.2.8",
         "nanoid": "^3.1.25",
         "vue": "^2.6.11",
@@ -62,7 +66,6 @@
         "not dead",
         "not ie 11"
     ],
-    "description": "",
     "author": "Wonseok Jung, Autonomous IoT Research Center, KETI",
     "repository": {
         "type": "github",

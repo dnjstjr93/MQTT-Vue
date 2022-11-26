@@ -14,6 +14,7 @@ module.exports = {
                 appId: 'kr.re.keti.app',
                 productName: "MQTT-Vue",
                 mac: {
+                    icon: "./public/icon.png",
                     target: [
                         {
                             target: "default"
@@ -22,9 +23,10 @@ module.exports = {
                     publish: ["github"]
                 },
                 dmg: {
-                    title:"MQTT-Vue"
+                    title: "MQTT-Vue"
                 },
                 win: {
+                    icon: "./public/icon.png",
                     target: [
                         {
                             target: "nsis",
@@ -44,8 +46,6 @@ module.exports = {
                         owner: "dnjstjr93",
                         repo: "MQTT-Vue",
                         vPrefixedTagName: true,
-                        host: "github.com",
-                        releaseType: "release",
                         channel: "latest",
                         private: true,
                         token: process.env.GH_TOKEN

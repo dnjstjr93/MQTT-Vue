@@ -5,26 +5,53 @@
             dark
             height="50"
         >
-            <v-toolbar-items class="hidden-sm-and-down">
-                <v-btn
-                    text
-                    style="font-size: 16px;"
-                    class="font-weight-bold"
-                    @click="onPublish(true)"
+            <v-col cols="10">
+                <v-toolbar-items class="hidden-sm-and-down">
+                    <v-btn
+                        text
+                        style="font-size: 16px;"
+                        class="font-weight-bold"
+                        @click="onPublish(true)"
+                    >
+                        Publish
+                    </v-btn>
+                    <v-divider vertical></v-divider>
+                    <v-btn
+                        text
+                        style="font-size: 16px;"
+                        class="font-weight-bold"
+                        @click="onPublish(false)"
+                    >
+                        Subscribe
+                    </v-btn>
+                    <v-divider vertical></v-divider>
+
+                </v-toolbar-items>
+            </v-col>
+            <v-col cols="2">
+                <h4
+                    class="float-end"
                 >
-                    Publish
-                </v-btn>
-                <v-divider vertical></v-divider>
-                <v-btn
-                    text
-                    style="font-size: 16px;"
-                    class="font-weight-bold"
-                    @click="onPublish(false)"
-                >
-                    Subscribe
-                </v-btn>
-                <v-divider vertical></v-divider>
-            </v-toolbar-items>
+                    <v-progress-circular
+                        indeterminate
+                        color="primary"
+                        v-if="connect_status === 'connecting...'"
+                    ></v-progress-circular>
+                    <font-awesome-icon
+                        class=""
+                        v-if="connect_status === 'Connection success'"
+                        icon="circle"
+                        color="green"
+                        size="1x"/>
+                    <font-awesome-icon
+                        class=""
+                        v-if="connect_status === 'Please reconnect'"
+                        icon="circle"
+                        color="red"
+                        size="1x"/>
+                    {{ connect_status }}
+                </h4>
+            </v-col>
         </v-toolbar>
 
         <v-row v-if="publishFlag">
@@ -79,6 +106,7 @@
                        elevation="5"
                        @click="doPublish"
                        height="40"
+                       style="font-family: '나눔스퀘어 Bold'"
                 >Publish
                 </v-btn>
             </v-col>
@@ -156,7 +184,7 @@
                 v-model="pub_message"
             ></v-textarea>
         </v-row>
-        <!--------------------------------------------------------------------------------------------------------------------->
+        <!------------------------------------------------------------------------------------------------------------->
         <v-row v-if="!publishFlag">
             <v-col cols="1" align-self="center">
                 <div class="mt-1 ml-6" style="font-size: 20px; font-weight: bold">Topic</div>
@@ -209,6 +237,7 @@
                        elevation="5"
                        height="40"
                        @click="doSubscribe"
+                       style="font-family: '나눔스퀘어 Bold'"
                 >Subscribe
                 </v-btn>
             </v-col>
@@ -229,13 +258,21 @@
                         </v-chip>
                     </v-chip-group>
                     <v-chip-group
+                        v-model="autoscroll_flag"
                         class="font-weight-bold"
-                        mandatory
+                        multiple
                         active-class="primary--text"
                     >
                         <v-chip
                             class="font-weight-bold"
-                            :key="true"
+                            filter
+                            @click="setAutoScroll"
+                        >
+                            AutoScroll
+                        </v-chip>
+                        <v-chip
+                            class="font-weight-bold"
+                            v-if="false"
                             @click="setAutoScroll"
                         >
                             AutoScroll
@@ -294,7 +331,7 @@
                                 active-class="primary--text text--accent-4"
                                 @click="SubTopic=item"
                             >
-                                <template v-slot:default="{ }">
+                                <template v-slot:default="{}">
                                     <v-list-item-content class="mr-n6" justify="space-between">
                                         <v-col class="my-n2 ml-n3">
                                             <v-list-item-title v-text="item"
@@ -311,21 +348,21 @@
                                                 Dump Message
                                             </v-btn>
                                             <v-btn
-                                                v-if="muteFlag"
+                                                v-if="muteFlag[item]"
                                                 rounded
                                                 height="20"
                                                 color="primary"
                                                 style="font-size: 10px"
-                                                @click="muteFlag=!muteFlag"
+                                                @click="muteFlag[item]=!muteFlag[item]"
                                             >
                                                 Mute
                                             </v-btn>
                                             <v-btn
-                                                v-if="!muteFlag"
+                                                v-if="!muteFlag[item]"
                                                 rounded
                                                 height="20"
                                                 style="font-size: 10px"
-                                                @click="muteFlag=!muteFlag"
+                                                @click="muteFlag[item]=!muteFlag[item]"
                                             >
                                                 Mute
                                             </v-btn>
@@ -351,6 +388,8 @@
                 <div class="font-weight-bold">Topic List</div>
                 <v-list dense>
                     <v-list-item-group v-model="model">
+                        <!--TODO: 스크롤 추가-->
+                        <!--TODO: item 선택 시 중복 선택 처리-->
                         <template v-for="(item, i) in SubTopicList">
                             <v-divider
                                 v-if="!item"
@@ -363,7 +402,7 @@
                                 :value="item"
                                 dense
                                 active-class="primary--text text--accent-4"
-                                @click="SelectTopic=item"
+                                @click="SelectTopic = item"
                             >
                                 <template v-slot:default="{ active }">
                                     <v-list-item-content>
@@ -377,7 +416,7 @@
 
                                     <v-list-item-action>
                                         <v-chip :input-value="active">
-                                            {{ msgLength[item] }}
+                                            {{ msgIndexList[i] }}
                                         </v-chip>
                                     </v-list-item-action>
                                 </template>
@@ -520,7 +559,13 @@
                 </v-row>
                 <v-row v-if="!publishFlag" class="mx-3" style="height: 100%">
                     <v-card class="ml-n1" height="300" width="1000" elevation="5">
-                        <v-card-text class="font-weight-bold" style="font-size: 15px">{{ sub_message }}</v-card-text>
+                        <v-textarea
+                            class="mx-3 my-1 font-weight-bold"
+                            style="font-size: 15px"
+                            rows="11"
+                            row-height="300"
+                            v-model="sub_message"
+                        ></v-textarea>
                     </v-card>
                 </v-row>
             </v-col>
@@ -545,12 +590,13 @@ export default {
                 endpoint: '/mqtt',
                 clean: true, // Reserved session
                 connectTimeout: 4000, // Time out
-                reconnectPeriod: 4000, // Reconnection interval
+                reconnectPeriod: 0, // Reconnection interval
                 clientId: 'mqtt_vue_' + nanoid(15),
             },
             client: {
                 connected: false,
             },
+            connect_status: '',
             subscribeSuccess: false,
             qosList: [
                 {label: 'QoS 0', value: 0},
@@ -573,6 +619,7 @@ export default {
             retain: false,
 
             AutoScroll: true,
+            autoscroll_flag: [0],
 
             model: 1,
             TopicList: [''],
@@ -584,13 +631,14 @@ export default {
             scanTopic: null,
             ScanFlag: false,
 
-            muteFlag: false,
+            muteFlag: {},
             opacity: 0.4,
             absolute: true,
 
             scrollInvoked: 0,
 
-            msgLength: {},
+            msgIndex: 0,
+            msgIndexList: [''],
 
             decoded: [
                 {title: 'Plane Text Decoder'},
@@ -611,55 +659,50 @@ export default {
             if (!this.$store.state.client.connected) {
                 const {port, protocol, endpoint, ...options} = this.connection
                 const serverip = this.$store.state.VUE_APP_MQTT_HOST
-                const connectUrl = `${protocol}://${serverip}:${port}${endpoint}`
+                const serverport = localStorage.getItem('mqtt_port')
+                const connectUrl = `${protocol}://${serverip}:${serverport}${endpoint}`
 
                 try {
                     this.$store.state.client = mqtt.connect(connectUrl, options)
+                    this.connect_status = 'connecting...'
                 } catch (error) {
                     console.log('mqtt.connect error', error)
+                    this.connect_status = 'Please reconnect'
+                    this.$store.state.MQTT_CONNECTION_CONNECTED = false
                 }
                 this.$store.state.client.on('connect', () => {
+                    this.connect_status = 'Connection success'
+                    setTimeout(() => {
+                        this.connect_status = ''
+                    }, 2000)
+
                     console.log(' (' + protocol + '://' + serverip + ':' + port + ') Connection succeeded!')
 
-                    let topic = '/#'
-                    let qos = 0
-                    this.$store.state.client.unsubscribe(topic)
-                    this.$store.state.client.subscribe(topic, {qos}, (error, res) => {
-                        if (error) {
-                            console.log('Subscribe to topics error', error)
-                        }
-                        this.subscribeSuccess = true
-                        console.log('Subscribe to topics res', res)
-                    })
+                    // let topic = '/#'
+                    // let qos = 0
+                    // this.$store.state.client.unsubscribe(topic)
+                    // this.$store.state.client.subscribe(topic, {qos}, (error, res) => {
+                    //     if (error) {
+                    //         console.log('Subscribe to ' + topic + ' error', error)
+                    //     }
+                    //     console.log('Subscribe to ' + topic + ' res', res)
+                    // })
                 })
                 this.$store.state.client.on('error', error => {
                     console.log('Connection failed', error)
+                    this.connect_status = 'Please reconnect'
+                    this.$store.state.MQTT_CONNECTION_CONNECTED = false
                 })
                 this.$store.state.client.on('message', (topic, message) => {
                     // console.log(`Received message ${message.toString()} from topic ${topic}`)
-
-                    if (this.ScanFlag) {
-                        if (!this.ScanTopics.includes(topic)) {
-                            this.ScanTopics.push(topic)
-                            this.ScanTopics.push('')
-                        }
-                    }
-
-                    if (this.SubTopic) {
-                        if (topic.includes(this.SubTopic.replace('#', ''))) {
-                            if (!this.SubTopicList.includes(topic)) {
+                    this.TopicList.forEach((subtopic) => {
+                        if (topic.includes(subtopic.replace('/#', ''))) {
+                            if (this.muteFlag[subtopic] === false) {
                                 this.SubTopicList.push(topic)
+                                this.msgIndexList.push(++this.msgIndex)
                                 this.SubTopicList.push('')
-                                this.msgLength[topic] = 1
-                            } else {
-                                this.msgLength[topic]++
-                            }
-                        }
-                    }
+                                this.msgIndexList.push('')
 
-                    if (this.SelectTopic) {
-                        if (!this.muteFlag) {
-                            if (topic === this.SelectTopic) {
                                 if (this.Decoder === 'Hex Format Decoder') {
                                     try {
                                         this.sub_message = message.toString('hex')
@@ -668,10 +711,11 @@ export default {
                                     }
                                 } else if (this.Decoder === 'JSON Pretty format Decoder') {
                                     try {
-                                        // TODO: 이스케이프 적용
-                                        this.sub_message = JSON.parse(message)
+                                        JSON.parse(message)
+                                        this.sub_message = message
                                     } catch (e) {
-                                        console.log("*** PAYLOAD IS NOT VALID JSON DATA ***\n" + e.message)
+                                        this.sub_message = "*** PAYLOAD IS NOT VALID JSON DATA ***\r\n" + e.message
+                                        console.log("*** PAYLOAD IS NOT VALID JSON DATA ***\r\n" + e.message)
                                     }
                                 } else if (this.Decoder === 'Base64 Decoder') {
                                     try {
@@ -683,6 +727,13 @@ export default {
                                     this.sub_message = message
                                 }
                             }
+                        }
+                    })
+
+                    if (this.ScanFlag) {
+                        if (!this.ScanTopics.includes(topic)) {
+                            this.ScanTopics.push(topic)
+                            this.ScanTopics.push('')
                         }
                     }
                 })
@@ -696,47 +747,93 @@ export default {
                 })
             }
 
-            this.storagePubTopic.push({title: this.pub_topic})
-            // TODO: 이미 있으면 패스, 없으면 저장
-            localStorage.setItem('PublishTopics', JSON.stringify(this.storagePubTopic))
+            // eslint-disable-next-line no-unused-vars
+            let storage_pub_flag = []
+            this.storagePubTopic.forEach((obj_index) => {
+                if (obj_index.title !== this.pub_topic) {
+                    storage_pub_flag.push(true)
+                } else {
+                    storage_pub_flag.push(false)
+                }
+            })
+            if (!storage_pub_flag.includes(false)) {
+                this.storagePubTopic.push({title: this.pub_topic})
+                localStorage.setItem('PublishTopics', JSON.stringify(this.storagePubTopic))
+                storage_pub_flag = []
+            }
         },
         doSubscribe() {
-            this.TopicList.push(this.sub_topic)
-            this.TopicList.push('')
             if (this.$store.state.client.connected) {
-                console.log(this.sub_topic, this.qos)
-                this.$store.state.client.subscribe(this.sub_topic, {qos: this.qos}, (error, res) => {
-                    if (error) {
-                        console.log('Subscribe to topics error', error)
-                    }
-                    this.subscribeSuccess = true
+                if (this.sub_topic !== '') {
+                    this.$store.state.client.unsubscribe(this.sub_topic, (error, res) => {
+                        if (error) {
+                            console.log('Unsubscribe to ' + this.sub_topic + ' error', error)
+                        }
+                        if (res) {
+                            console.log('Unsubscribe to ' + this.sub_topic + ' res', res)
+                        }
+                    })
+                    this.$store.state.client.subscribe(this.sub_topic, {qos: this.qos}, (error, res) => {
+                        if (error) {
+                            console.log('Subscribe to ' + this.sub_topic + ' error', error)
+                        }
+                        if (res) {
+                            console.log('Subscribe to ' + this.sub_topic + ' res', res)
+                        }
 
-                    console.log('Subscribe to topics res', res)
-                })
+                        this.muteFlag[this.sub_topic] = false
+
+                        if (!this.TopicList.includes(this.sub_topic)) {
+                            this.TopicList.push(this.sub_topic)
+                            this.TopicList.push('')
+                        }
+
+                        // eslint-disable-next-line no-unused-vars
+                        let storage_sub_flag = []
+                        this.storageSubTopic.forEach((obj_index) => {
+                            if (obj_index.title !== this.sub_topic) {
+                                storage_sub_flag.push(true)
+                            } else {
+                                storage_sub_flag.push(false)
+                            }
+                        })
+                        if (!storage_sub_flag.includes(false)) {
+                            this.storageSubTopic.push({title: this.sub_topic})
+                            localStorage.setItem('SubscribeTopics', JSON.stringify(this.storageSubTopic))
+                            storage_sub_flag = []
+                        }
+                    })
+                }
             }
-            this.storageSubTopic.push({title: this.sub_topic})
-            localStorage.setItem('SubscribeTopics', JSON.stringify(this.storageSubTopic))
         },
         doScanSubscribe(item) {
-            console.log(item)
             if (item) {
                 this.sub_topic = item
             }
-            this.TopicList.push(this.sub_topic)
-            this.TopicList.push('')
+            this.muteFlag[this.sub_topic] = false
+
+            if (!this.TopicList.includes(this.sub_topic)) {
+                this.TopicList.push(this.sub_topic)
+                this.TopicList.push('')
+            }
             if (this.$store.state.client.connected) {
-                console.log(this.sub_topic, this.qos)
+                this.$store.state.client.unsubscribe(this.sub_topic, (error, res) => {
+                    if (error) {
+                        console.log('Unsubscribe to ' + this.sub_topic + ' error', error)
+                    }
+                    if (res) {
+                        console.log('Unsubscribe to ' + this.sub_topic + ' res', res)
+                    }
+                })
                 this.$store.state.client.subscribe(this.sub_topic, {qos: this.qos}, (error, res) => {
                     if (error) {
-                        console.log('Subscribe to topics error', error)
+                        console.log('Subscribe to ' + this.sub_topic + ' error', error)
                     }
-                    this.subscribeSuccess = true
-
-                    console.log('Subscribe to topics res', res)
+                    if (res) {
+                        console.log('Subscribe to ' + this.sub_topic + ' res', res)
+                    }
                 })
             }
-            this.storageSubTopic.push({title: this.sub_topic})
-            localStorage.setItem('SubscribeTopics', JSON.stringify(this.storageSubTopic))
         },
         doUnsubscribe(topic) {
             this.SubTopic = null
@@ -765,7 +862,9 @@ export default {
                     if (error) {
                         console.log('Unsubscribe to topics error', error)
                     }
-                    console.log('Unsubscribe to topics res', res)
+                    if (res) {
+                        console.log('Unsubscribe to topics res', res)
+                    }
                 })
             }
         },
@@ -803,6 +902,16 @@ export default {
             this.AutoScroll = !this.AutoScroll
         },
         setScan() {
+            let topic = '/#'
+            let qos = 0
+            this.$store.state.client.unsubscribe(topic)
+            this.$store.state.client.subscribe(topic, {qos}, (error, res) => {
+                if (error) {
+                    console.log('Subscribe to ' + topic + ' error', error)
+                }
+                console.log('Subscribe to ' + topic + ' res', res)
+            })
+
             this.ScanFlag = true
         },
         setStop() {
@@ -854,7 +963,20 @@ export default {
             } else if (item === "Clear Messages") {
                 this.sub_message = ''
             }
+        },
+        RecvTopic_man() {
+            if (this.AutoScroll) {
+                if (this.SubTopicList.length > 10) {
+                    this.SubTopicList.shift()
+                    this.msgIndexList.shift()
+                    this.SubTopicList.shift()
+                    this.msgIndexList.shift()
+                }
+            }
         }
+    },
+    watch: {
+        'SubTopicList': 'RecvTopic_man'
     },
     mounted() {
         EventBus.$on('mqttConnection', () => {
