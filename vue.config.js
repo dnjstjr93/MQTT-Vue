@@ -14,7 +14,7 @@ module.exports = {
                 appId: 'kr.re.keti.app',
                 productName: "MQTT-Vue",
                 mac: {
-                    icon: "./public/icon.png",
+                    icon: "./public/logo.png",
                     target: [
                         {
                             target: "default"
@@ -26,14 +26,14 @@ module.exports = {
                     title: "MQTT-Vue"
                 },
                 win: {
-                    icon: "./public/icon.png",
+                    icon: "./public/logo.png",
+                    publish: ["github"],
                     target: [
                         {
                             target: "nsis",
                             arch: ["x64", "ia32"]
                         }
                     ],
-                    publish: ["github"]
                 },
                 nsis: {
                     oneClick: false,
